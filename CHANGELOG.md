@@ -28,3 +28,36 @@ All notable changes to this project will be documented in this file.
 - Fixed bug where new messages were overwriting old ones due to missing ID broadcast.
 - Fixed stale state issues where "Approve" button wouldn't update UI until refresh.
 - Resolved TypeScript errors and syntax issues in Sidebar and Dashboard components.
+
+---
+
+## [0.2.0] - Prior to 2026-01-17
+
+### Added
+- **Visual Identity**:
+  - Implemented Glassmorphism design system with Tailwind CSS.
+  - Added Dark/Light mode theme engine using CSS variables and React state.
+- **AI Core**:
+  - Integrated Local LLM support via OpenAI-compatible endpoint (LM Studio).
+  - Implemented System Prompts and basic conversation memory.
+- **Operator Dashboard**:
+  - Created the first iteration of the ChatDashboard with message bubbles and input field.
+  - Side-panel for client listing (initial static data).
+
+### Changed
+- Migrated from vanilla CSS to localized component-based styles.
+
+## [0.1.0] - Project Inception
+
+### Added
+- **Infrastructure**:
+  - Core FastAPI server setup with Uvicorn.
+  - SQLite database integration with SQLAlchemy ORM.
+  - Initial database schema: `Client`, `Conversation`, `Message`.
+- **Real-time Engine**:
+  - WebSocket Manager for broadcasting messages to multiple frontend instances.
+- **WhatsApp Webhook Simulation**:
+  - Endpoint for receiving/simulating external messages from WhatsApp.
+- **Frontend Skeleton**:
+  - Vite + React + TypeScript boilerplate.
+  - Basic routing and workspace structure.
