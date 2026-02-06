@@ -32,6 +32,8 @@ jobs:
         PYTHONPATH: ./server
         OPENAI_API_BASE: "http://localhost:1234/v1"
         DEFAULT_PRIMARY_COLOR: "#2563eb"
+        # Dummy key for testing (32 url-safe base64-encoded bytes)
+        ENCRYPTION_KEY: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
 
   frontend:
     runs-on: ubuntu-latest

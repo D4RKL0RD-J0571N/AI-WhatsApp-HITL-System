@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from main import app
-from services.db import get_db, SessionLocal
+from database import get_db, SessionLocal
 
 client = TestClient(app)
 
