@@ -29,6 +29,7 @@ jobs:
       run: |
         pytest -v
       env:
+        PYTHONPATH: ./server
         OPENAI_API_BASE: "http://localhost:1234/v1"
         DEFAULT_PRIMARY_COLOR: "#2563eb"
 
