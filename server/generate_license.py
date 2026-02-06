@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives import serialization
 # Path to your OFFLINE private key
 PRIVATE_KEY_PATH = "keys/private.pem"
 
-def generate_license(license_data: dict, private_key_path: str = PRIVATE_KEY_PATH) -> str:
+def generate_license(license_data: dict, private_key_path: str = None) -> str:
     """
     Generates a signed JWT license key.
     
@@ -17,6 +17,10 @@ def generate_license(license_data: dict, private_key_path: str = PRIVATE_KEY_PAT
     - max_seats (int)
     - days_valid (int) - helper to calc expires_at
     """
+    if private_key_path is None:
+        import os
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        private_key_path = os.path.join(base_dir, PRIVATE_KEY_PATH)
     
     # Calculate Expiration
     days = license_data.pop("days_valid", 365)

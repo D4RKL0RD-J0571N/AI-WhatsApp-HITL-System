@@ -1,0 +1,165 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- C:\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Jostin\.gemini\antigravity\playground\vacant-universe
+plugins: anyio-4.11.0, langsmith-0.4.43, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+server/tests/test_workspace.py::test_save_and_retrieve_workspace_config FAILED [100%]
+
+================================== FAILURES ===================================
+___________________ test_save_and_retrieve_workspace_config ___________________
+
+    def test_save_and_retrieve_workspace_config():
+        # 1. Initialize DB (Blocking wait)
+>       asyncio.run(init_test_db())
+
+server\tests\test_workspace.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+main = <coroutine object init_test_db at 0x000001AFE1AC4820>
+
+    def run(main, *, debug=None, loop_factory=None):
+        """Execute the coroutine and return the result.
+    
+        This function runs the passed coroutine, taking care of
+        managing the asyncio event loop, finalizing asynchronous
+        generators and closing the default executor.
+    
+        This function cannot be called when another asyncio event loop is
+        running in the same thread.
+    
+        If debug is True, the event loop will be run in debug mode.
+        If loop_factory is passed, it is used for new event loop creation.
+    
+        This function always creates a new event loop and closes it at the end.
+        It should be used as a main entry point for asyncio programs, and should
+        ideally only be called once.
+    
+        The executor is given a timeout duration of 5 minutes to shutdown.
+        If the executor hasn't finished within that duration, a warning is
+        emitted and the executor is closed.
+    
+        Example:
+    
+            async def main():
+                await asyncio.sleep(1)
+                print('hello')
+    
+            asyncio.run(main())
+        """
+        if events._get_running_loop() is not None:
+            # fail fast with short traceback
+            raise RuntimeError(
+                "asyncio.run() cannot be called from a running event loop")
+    
+        with Runner(debug=debug, loop_factory=loop_factory) as runner:
+>           return runner.run(main)
+                   ^^^^^^^^^^^^^^^^
+
+C:\Python313\Lib\asyncio\runners.py:195: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <asyncio.runners.Runner object at 0x000001AFE1AC4980>
+coro = <coroutine object init_test_db at 0x000001AFE1AC4820>
+
+    def run(self, coro, *, context=None):
+        """Run a coroutine inside the embedded event loop."""
+        if not coroutines.iscoroutine(coro):
+            raise ValueError("a coroutine was expected, got {!r}".format(coro))
+    
+        if events._get_running_loop() is not None:
+            # fail fast with short traceback
+            raise RuntimeError(
+                "Runner.run() cannot be called from a running event loop")
+    
+        self._lazy_init()
+    
+        if context is None:
+            context = self._context
+        task = self._loop.create_task(coro, context=context)
+    
+        if (threading.current_thread() is threading.main_thread()
+            and signal.getsignal(signal.SIGINT) is signal.default_int_handler
+        ):
+            sigint_handler = functools.partial(self._on_sigint, main_task=task)
+            try:
+                signal.signal(signal.SIGINT, sigint_handler)
+            except ValueError:
+                # `signal.signal` may throw if `threading.main_thread` does
+                # not support signals (e.g. embedded interpreter with signals
+                # not registered - see gh-91880)
+                sigint_handler = None
+        else:
+            sigint_handler = None
+    
+        self._interrupt_count = 0
+        try:
+>           return self._loop.run_until_complete(task)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+C:\Python313\Lib\asyncio\runners.py:118: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <ProactorEventLoop running=False closed=True debug=False>
+future = <Task finished name='Task-1' coro=<init_test_db() done, defined at C:\Users\Jostin\.gemini\antigravity\playground\vaca...\.gemini\\antigravity\\playground\\vacant-universe\\server\\tests\\..\\generate_license.py', 24, 5, '    """', 24, 5))>
+
+    def run_until_complete(self, future):
+        """Run until the Future is done.
+    
+        If the argument is a coroutine, it is wrapped in a Task.
+    
+        WARNING: It would be disastrous to call run_until_complete()
+        with the same coroutine twice -- it would wrap it in two
+        different Tasks and that can't be good.
+    
+        Return the Future's result, or raise its exception.
+        """
+        self._check_closed()
+        self._check_running()
+    
+        new_task = not futures.isfuture(future)
+        future = tasks.ensure_future(future, loop=self)
+        if new_task:
+            # An exception is raised if the future didn't complete, so there
+            # is no need to log the "destroy pending task" message
+            future._log_destroy_pending = False
+    
+        future.add_done_callback(_run_until_complete_cb)
+        try:
+            self.run_forever()
+        except:
+            if new_task and future.done() and not future.cancelled():
+                # The coroutine raised a BaseException. Consume the exception
+                # to not log a warning, the caller doesn't have access to the
+                # local task.
+                future.exception()
+            raise
+        finally:
+            future.remove_done_callback(_run_until_complete_cb)
+        if not future.done():
+            raise RuntimeError('Event loop stopped before Future completed.')
+    
+>       return future.result()
+               ^^^^^^^^^^^^^^^
+
+C:\Python313\Lib\asyncio\base_events.py:725: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    async def init_test_db():
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+            await conn.run_sync(Base.metadata.create_all)
+    
+        async with TestingSessionLocal() as session:
+>           from generate_license import generate_license
+E             File "C:\Users\Jostin\.gemini\antigravity\playground\vacant-universe\server\tests\..\generate_license.py", line 24
+E               """
+E               ^
+E           SyntaxError: unterminated triple-quoted string literal (detected at line 56)
+
+server\tests\test_workspace.py:50: SyntaxError
+=========================== short test summary info ===========================
+FAILED server/tests/test_workspace.py::test_save_and_retrieve_workspace_config
+============================== 1 failed in 1.56s ==============================

@@ -10,6 +10,7 @@ import sys
 import os
 # We don't need sys.path hack if PYTHONPATH is set, but helpful for local:
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+os.environ["TESTING"] = "true"
 
 from main import app
 from database import Base, get_async_db
@@ -46,6 +47,16 @@ async def init_test_db():
         await conn.run_sync(Base.metadata.create_all)
     
     async with TestingSessionLocal() as session:
+        from generate_license import generate_license
+        test_license_data = {
+            "business_name": "Test Business",
+            "plan": "enterprise",
+            "features": ["whatsapp", "hitl_review", "analytics", "branding"],
+            "max_seats": 10,
+            "days_valid": 365
+        }
+        test_key = generate_license(test_license_data)
+
         # Create a default active config
         config = AIConfig(
             business_name="Test Business",
@@ -57,10 +68,10 @@ async def init_test_db():
             suggestions_json="[]",
             workspace_config="{}",
             is_active=True,
+            license_key=test_key,
             # Defaults for non-nullable fields if any not covered by defaultModel values
             auto_respond_threshold=90,
             review_threshold=50
-            # Secrets might be nullable, so this should be enough
         )
         session.add(config)
         await session.commit()
