@@ -40,8 +40,39 @@ app.dependency_overrides[get_admin_user] = override_get_admin_user
 
 client = TestClient(app)
 
+# Helper to ensure license keys exist for generation (needed in CI)
+def ensure_keys_exist():
+    keys_dir = os.path.join(os.path.dirname(__file__), '../keys')
+    private_key = os.path.join(keys_dir, 'private.pem')
+    public_key = os.path.join(keys_dir, 'public.pem')
+    
+    if not os.path.exists(private_key):
+        print("CI/Test Environment detected: Generating temporary license keys...")
+        os.makedirs(keys_dir, exist_ok=True)
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives.asymmetric import ed25519
+        
+        # Generate new temp key pair
+        pk = ed25519.Ed25519PrivateKey.generate()
+        
+        # Save Private
+        with open(private_key, "wb") as f:
+            f.write(pk.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption()
+            ))
+            
+        # Save Public
+        with open(public_key, "wb") as f:
+            f.write(pk.public_key().public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo
+            ))
+
 # Helper to Initialize DB with Seed Data
 async def init_test_db():
+    ensure_keys_exist()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
