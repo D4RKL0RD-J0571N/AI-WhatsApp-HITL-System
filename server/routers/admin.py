@@ -474,3 +474,59 @@ async def get_security_audits_legacy(db: AsyncSession = Depends(get_async_db), a
     Legacy alias for AI security scan logs.
     """
     return await list_security_audits(db)
+
+# ----------------------------------------------------------------
+# Licensing Management
+# ----------------------------------------------------------------
+class LicenseUploadRequest(BaseModel):
+    license_key: str
+
+@router.post("/license")
+async def upload_license(req: LicenseUploadRequest, db: AsyncSession = Depends(get_async_db), admin: User = Depends(get_admin_user)):
+    """Upload and activate a new license key."""
+    from services.licensing import LicensingService # lazy import to avoid circle
+    
+    # 1. Verify before saving
+    try:
+        payload = LicensingService.verify_license(req.license_key)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+        
+    # 2. Save to Config
+    result = await db.execute(select(AIConfig).filter(AIConfig.is_active == True))
+    config = result.scalars().first()
+    
+    if not config:
+        # Should not happen in normally bootstrapped system
+        raise HTTPException(status_code=404, detail="System configuration not found.")
+        
+    config.license_key = req.license_key
+    
+    # Audit trail
+    log = AuditLog(
+        user_id=admin.id,
+        action="UPDATE_LICENSE",
+        resource="System",
+        details=f"Updated license for {payload.get('business_name')} (Plan: {payload.get('plan')})"
+    )
+    db.add(log)
+    await db.commit()
+    
+    return {"status": "success", "message": "License activated successfully", "payload": payload}
+
+@router.get("/license")
+async def get_license_status(db: AsyncSession = Depends(get_async_db), admin: User = Depends(get_admin_user)):
+    """Check current license status."""
+    from services.licensing import LicensingService
+    
+    result = await db.execute(select(AIConfig).filter(AIConfig.is_active == True))
+    config = result.scalars().first()
+    
+    if not config or not config.license_key:
+        return {"status": "missing", "payload": None}
+        
+    try:
+        payload = LicensingService.verify_license(config.license_key)
+        return {"status": "active", "payload": payload}
+    except Exception as e:
+         return {"status": "invalid", "error": str(e), "payload": None}

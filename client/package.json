@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.18",
     "i18next": "^25.7.4",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-contexify": "^6.0.0",

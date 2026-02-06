@@ -104,6 +104,7 @@ class AIConfig(Base):
     tenant_id = Column(String, default="default", index=True)
     
     is_active = Column(Boolean, default=True)
+    license_key = Column(Text, nullable=True) # v16 - Licensing
     updated_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
 
 
