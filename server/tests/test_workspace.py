@@ -13,7 +13,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
 from main import app
 from database import Base, get_async_db
-from models import AIConfig
+from routers.auth import get_admin_user
+from models import AIConfig, User
 
 # Setup In-Memory Async DB for Testing
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -29,7 +30,12 @@ async def override_get_async_db():
     async with TestingSessionLocal() as session:
         yield session
 
+# Mock Admin User
+def override_get_admin_user():
+    return User(id=1, username="admin", role="admin", is_active=True)
+
 app.dependency_overrides[get_async_db] = override_get_async_db
+app.dependency_overrides[get_admin_user] = override_get_admin_user
 
 client = TestClient(app)
 
