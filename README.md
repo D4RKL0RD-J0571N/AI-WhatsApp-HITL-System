@@ -17,6 +17,31 @@ It is designed for B2B environments where customer interactions must comply with
 - Surface rich observability data (latency, confidence, violation counts, and token metrics).
 - **Hybrid Configuration Model:** Supports environment-variable defaults with runtime database overrides for zero-downtime reconfiguration.
 
+### ⚡ System Flow
+```mermaid
+graph TD
+    Client((Client)) -->|WhatsApp Msg| API[FastAPI Webhook]
+    API --> Guardrail{🛡️ Security Guardrail}
+    
+    Guardrail -->|⛔ Unsafe/Political| Block[Block & Audit Event]
+    Guardrail -->|✅ Safe| Context[Intent Orchestrator]
+    
+    Context --> AI[🤖 LLM Engine]
+    AI --Confidence Score--> Check{Confidence > Threshold?}
+    
+    Check -->|Yes| Reply[Auto-Reply]
+    Check -->|No| HITL[👨‍💻 Human Review Queue]
+    
+    HITL -->|Approve/Edit| Reply
+    HITL -->|Reject| Drop[Drop Message]
+    
+    Reply -->|WhatsApp API| Client
+    
+    style Guardrail fill:#f9f,stroke:#333,stroke-width:2px
+    style HITL fill:#bbf,stroke:#333,stroke-width:2px
+    style API fill:#dfd,stroke:#333,stroke-width:4px
+```
+
 ---
 
 ## 🎨 Dynamic Branding & Theming
