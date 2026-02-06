@@ -16,7 +16,6 @@ It is designed for B2B environments where customer interactions must comply with
 - Provide real-time HITL oversight for pending AI-generated responses.
 - Surface rich observability data (latency, confidence, violation counts, and token metrics).
 - **Hybrid Configuration Model:** Supports environment-variable defaults with runtime database overrides for zero-downtime reconfiguration.
-
 ### ⚡ System Flow
 ```mermaid
 graph TD
@@ -41,7 +40,6 @@ graph TD
     style HITL fill:#bbf,stroke:#333,stroke-width:2px
     style API fill:#dfd,stroke:#333,stroke-width:4px
 ```
-
 ---
 
 ## 🎨 Dynamic Branding & Theming
